@@ -8,8 +8,8 @@ object KeyGenerator {
 
     private val format = SimpleDateFormat("yyyyMMddHHmm")
 
-    operator fun invoke(pwd: String, cmd: String): String {
-       return md5(pwd + format.format(Date()) + "@$cmd")
+    operator fun invoke(pwd: String, msg: String): String {
+       return md5(pwd + format.format(Date()) + "@$msg")
     }
 
     private fun md5(raw: String): String {

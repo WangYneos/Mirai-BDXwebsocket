@@ -2,10 +2,7 @@ package com.github.dazecake.websocket
 
 import com.github.dazecake.BDXWebSocketPlugin
 import com.github.dazecake.bot.BotClient
-import com.github.dazecake.data.Incoming
-import com.github.dazecake.data.Outgoing
-import com.github.dazecake.data.RunCmd
-import com.github.dazecake.data.ServerInfo
+import com.github.dazecake.data.*
 import com.github.dazecake.util.BDXJson
 import com.github.dazecake.util.KeyGenerator
 import io.ktor.client.HttpClient
@@ -82,6 +79,7 @@ class WebsocketClient(private val serverInfo: ServerInfo) {
             while (true) {
                 when (val frame = session.incoming.receive()) {
                     is Frame.Text -> {
+                        BDXWebSocketPlugin.logger.info("DEBUG: "+frame.readText())
                         BotClient.onReceive(BDXJson.json.parse(Incoming.serializer(), frame.readText()))
                     }
                 }
@@ -93,11 +91,8 @@ class WebsocketClient(private val serverInfo: ServerInfo) {
             BDXWebSocketPlugin.logger.info("BDX reboot")
         }
     }
-
     suspend fun sendCmd(cmd: String) {
-        outgoing.send(
-            Frame.Text(
-                BDXJson.stringifyOuting(
+        outgoing.send(Frame.Text(BDXJson.stringifyOuting(
                     RunCmd(passwd = "", cmd = cmd).apply {
                         passwd = KeyGenerator(serverInfo.basePwd, BDXJson.stringifyOuting(this))
                     }
@@ -106,5 +101,15 @@ class WebsocketClient(private val serverInfo: ServerInfo) {
         )
 
         BDXWebSocketPlugin.logger.info("Sent BDX command -> $cmd")
+    }
+    suspend fun sendText(text: String) {
+        outgoing.send(Frame.Text(BDXJson.stringifyOuting(
+            SendText(passwd = "", text = text).apply {
+                passwd = KeyGenerator(serverInfo.basePwd, BDXJson.stringifyOuting(this))
+            }
+        )
+        )
+        )
+        BDXWebSocketPlugin.logger.info("Sent BDX Text -> $text")
     }
 }

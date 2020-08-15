@@ -17,12 +17,12 @@ object BotClient {
 
     suspend fun onReceive(pkg: Incoming) {
         when (pkg) {
-            is MemberMessage -> onMemberMessage(pkg)
-            is MemberJoin -> onMemberJoin(pkg)
-            is MemberLeave -> onMemberLeave(pkg)
-            is MemberCmd -> onMemberCmd(pkg)
-            is CmdResp -> onCmdResp(pkg)
-            is ServerCrash -> onServerCrash(pkg)
+            is MC_onmsg -> onMemberMessage(pkg)
+            is MC_onjoin -> onMemberJoin(pkg)
+            is MC_onleft -> onMemberLeave(pkg)
+            is MC_onCMD -> onMemberCmd(pkg)
+            is MC_cmd_return -> onCmdResp(pkg)
+            is MC_OnServerCrash -> onServerCrash(pkg)
         }
     }
 
@@ -46,30 +46,34 @@ object BotClient {
         BDXWebSocketPlugin.launchWebsocket()
     }
 
-    private suspend fun onMemberMessage(pkg: MemberMessage) {
+    private suspend fun onMemberMessage(pkg: MC_onmsg) {
         // filter mc chat msg
-        if (pkg.text.startsWith(Template.prefixMc)) {
-            pushMessage(Template.BDXTemplate.onMsg(pkg.target, pkg.text.removePrefix(Template.prefix)))
+        if(Template.prefixMc != "NONE"){
+            if (pkg.text.startsWith(Template.prefixMc)) {
+                pushMessage(Template.BDXTemplate.onMsg(pkg.target, pkg.text.removePrefix(Template.prefix)))
+            }
+        }else {
+            pushMessage(Template.BDXTemplate.onMsg(pkg.target, pkg.text))
         }
     }
 
-    private suspend fun onMemberJoin(pkg: MemberJoin) {
+    private suspend fun onMemberJoin(pkg: MC_onjoin) {
         pushMessage(Template.BDXTemplate.onJoin(pkg.target))
     }
 
-    private suspend fun onMemberLeave(pkg: MemberLeave) {
+    private suspend fun onMemberLeave(pkg: MC_onleft) {
         pushMessage(Template.BDXTemplate.onLeave(pkg.target))
     }
 
-    private suspend fun onMemberCmd(pkg: MemberCmd) {
+    private suspend fun onMemberCmd(pkg: MC_onCMD) {
         pushMessage(Template.BDXTemplate.onCMD(pkg.target,pkg.text))
     }
 
-    private suspend fun onCmdResp(pkg: CmdResp) {
+    private suspend fun onCmdResp(pkg: MC_cmd_return) {
         pushMessage(pkg.text)
     }
 
-    private suspend fun onServerCrash(pkg: ServerCrash) {
+    private suspend fun onServerCrash(pkg: MC_OnServerCrash) {
         pushMessage(pkg.reason)
     }
 

@@ -85,8 +85,9 @@ object BDXWebSocketPlugin : PluginBase() {
             launchWebsocket()
         }
         subscribeMessages {
-            startsWith(Template.prefix, trim = true) {
 
+            startsWith(Template.prefix, trim = true) {
+                BDXWebSocketPlugin.logger.info("In cmd -> $it")
                 val cmd = it
 
                 if (AuthorityManager.checkAuthority(sender.id, cmd)) {
@@ -110,10 +111,29 @@ object BDXWebSocketPlugin : PluginBase() {
                 }
             }
 
+            startsWith(Template.Msgprefix, trim = true) {
+                BDXWebSocketPlugin.logger.info("In msg -> $it")
+                val in_msg = it
+                var msg = in_msg
+                if (AuthorityManager.checkAuthority(sender.id, msg)) {
+
+                    var realmsg: String = Template.sendoutmsg
+
+                    realmsg = when (this) {
+                        is GroupMessageEvent -> Template.replaceCmdWithMember(realmsg, sender) // as Member
+                        else -> Template.replaceCmdWithFriend(realmsg, sender)  // as QQ
+                    }
+                    msg = msg.replaceFirst(Template.Msgprefix, "")
+                    realmsg += msg
+                    Websocket.sendText(realmsg)
+                }
+            }
+
             case(Template.rebootCmd) {
                 Websocket.life = serverInfo.retryTime
                 launchWebsocket()
             }
+
         }
 
     }

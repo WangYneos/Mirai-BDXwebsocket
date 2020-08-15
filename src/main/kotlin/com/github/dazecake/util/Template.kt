@@ -10,8 +10,11 @@ object Template {
 
     private const val SENDER_NAME = "\${senderName}"
     lateinit var prefix: String
+    lateinit var Msgprefix: String
     lateinit var prefixMc: String
     lateinit var rebootCmd: String
+    lateinit var sendoutmsg: String
+
     lateinit var connectMsg: String
     lateinit var dropMsg: String
     lateinit var closeMsg: String
@@ -36,10 +39,12 @@ object Template {
     fun load(section: ConfigSection) {
         prefix = section.getString("prefix")
         prefixMc = section.getString("mc_prefix")
+        Msgprefix = section.getString("msg_prefix")
         rebootCmd = section.getString("reboot_cmd")
         connectMsg = section.getString("connect_msg")
         dropMsg = section.getString("drop_msg")
         closeMsg = section.getString("close_msg")
+        sendoutmsg = section.getString("sendmsg_template")
 
         BDXTemplate.onMsg = section.getString("on_msg_template")
         BDXTemplate.onJoin = section.getString("on_join_template")
